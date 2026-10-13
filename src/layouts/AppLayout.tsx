@@ -2,12 +2,14 @@ import { Suspense } from 'react'
 import { Link, Outlet } from 'react-router-dom'
 import Toaster from '@/components/Toaster'
 import NotificationBell from '@/features/notifications/NotificationBell'
+import { useRealtimeNotifications } from '@/features/notifications/hooks'
 import { useLogout } from '@/features/auth/hooks'
 import { useAuthStore } from '@/stores/auth'
 
 export default function AppLayout() {
   const user = useAuthStore((state) => state.user)
   const logout = useLogout()
+  useRealtimeNotifications()
 
   const isOwner = Boolean(
     user && (user.roles.includes('store_owner') || user.roles.includes('super_admin')),
@@ -35,6 +37,11 @@ export default function AppLayout() {
                 Favorit
               </Link>
             )}
+            {user && (
+              <Link to="/loyalty" className="text-slate-600 hover:text-slate-900">
+                Poin
+              </Link>
+            )}
             {isOwner && (
               <Link to="/owner" className="text-slate-600 hover:text-slate-900">
                 Kelola
@@ -45,6 +52,11 @@ export default function AppLayout() {
                 Booking Masuk
               </Link>
             )}
+            {isOwner && (
+              <Link to="/owner/wallet" className="text-slate-600 hover:text-slate-900">
+                Dompet
+              </Link>
+            )}
             {isAdmin && (
               <>
                 <Link to="/admin" className="text-slate-600 hover:text-slate-900">
@@ -52,6 +64,9 @@ export default function AppLayout() {
                 </Link>
                 <Link to="/admin/stores" className="text-slate-600 hover:text-slate-900">
                   Tenant
+                </Link>
+                <Link to="/admin/withdrawals" className="text-slate-600 hover:text-slate-900">
+                  Penarikan
                 </Link>
                 <Link to="/admin/users" className="text-slate-600 hover:text-slate-900">
                   Pengguna

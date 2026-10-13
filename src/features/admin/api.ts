@@ -8,6 +8,7 @@ import type {
   PlatformSettings,
   UserStatus,
 } from '@/types/admin'
+import type { Withdrawal, WithdrawalStatus } from '@/types/withdrawal'
 
 export interface AdminStoreFilters {
   status?: string
@@ -92,4 +93,30 @@ export async function fetchAdminAuditLogs(filters: AdminAuditLogFilters = {}) {
     { params: filters },
   )
   return { logs: data.data, meta: data.meta }
+}
+
+export interface AdminWithdrawalFilters {
+  status?: WithdrawalStatus | ''
+  store_id?: number | string
+  page?: number
+}
+
+export type AdminWithdrawalAction = 'approve' | 'reject' | 'mark-paid'
+
+export async function fetchAdminWithdrawals(filters: AdminWithdrawalFilters = {}) {
+  const { data } = await api.get<ApiEnvelope<Withdrawal[]> & { meta: PaginationMeta }>(
+    '/admin/withdrawals',
+    { params: filters },
+  )
+  return { withdrawals: data.data, meta: data.meta }
+}
+
+export async function transitionAdminWithdrawal(
+  id: number | string,
+  action: AdminWithdrawalAction,
+): Promise<Withdrawal> {
+  const { data } = await api.post<ApiEnvelope<Withdrawal>>(
+    `/admin/withdrawals/${id}/${action}`,
+  )
+  return data.data
 }

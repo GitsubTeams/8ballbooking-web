@@ -5,6 +5,8 @@ import type {
   AdminStoreAction,
   AdminStoreFilters,
   AdminUserFilters,
+  AdminWithdrawalAction,
+  AdminWithdrawalFilters,
 } from '@/features/admin/api'
 import type { PlatformSettings, UserStatus } from '@/types/admin'
 import { getErrorMessage } from '@/lib/errors'
@@ -112,4 +114,38 @@ export function useAdminAuditLogs(filters: AdminAuditLogFilters = {}) {
     queryKey: ['admin', 'audit-logs', filters],
     queryFn: () => adminApi.fetchAdminAuditLogs(filters),
   })
+}
+
+export function useAdminWithdrawals(filters: AdminWithdrawalFilters = {}) {
+  return useQuery({
+    queryKey: ['admin', 'withdrawals', filters],
+    queryFn: () => adminApi.fetchAdminWithdrawals(filters),
+  })
+}
+
+const withdrawalActionMessages: Record<AdminWithdrawalAction, string> = {
+  approve: 'Penarikan disetujui.',
+  reject: 'Penarikan ditolak.',
+  'mark-paid': 'Penarikan ditandai dibayar.',
+}
+
+export function useAdminWithdrawalMutations() {
+  const queryClient = useQueryClient()
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ['admin', 'withdrawals'] })
+    queryClient.invalidateQueries({ queryKey: ['admin', 'audit-logs'] })
+  }
+
+  const transition = useMutation({
+    mutationFn: ({ id, action }: { id: number; action: AdminWithdrawalAction }) =>
+      adminApi.transitionAdminWithdrawal(id, action),
+    onSuccess: (_withdrawal, variables) => {
+      invalidate()
+      toast.success(withdrawalActionMessages[variables.action])
+    },
+    onError,
+  })
+
+  return { transition }
 }

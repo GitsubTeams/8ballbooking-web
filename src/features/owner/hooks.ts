@@ -8,6 +8,7 @@ import type {
 } from '@/features/owner/api'
 import { getErrorMessage } from '@/lib/errors'
 import { toast } from '@/stores/toast'
+import type { WithdrawalInput } from '@/features/owner/api'
 import type { VoucherInput } from '@/types/voucher'
 
 const onError = (error: unknown) => toast.error(getErrorMessage(error))
@@ -290,6 +291,30 @@ export function useOwnerBookingTransition() {
       queryClient.invalidateQueries({ queryKey: ['owner', 'bookings'] })
       queryClient.invalidateQueries({ queryKey: ['owner', 'summary'] })
       toast.success('Status booking diperbarui.')
+    },
+    onError,
+  })
+}
+
+export function useOwnerWithdrawals(filters: ownerApi.OwnerWithdrawalFilters = {}) {
+  return useQuery({
+    queryKey: ['owner', 'withdrawals', filters],
+    queryFn: () => ownerApi.fetchOwnerWithdrawals(filters),
+  })
+}
+
+export function useOwnerWallet() {
+  return useQuery({ queryKey: ['owner', 'wallet'], queryFn: ownerApi.fetchOwnerWallet })
+}
+
+export function useCreateWithdrawal() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: WithdrawalInput) => ownerApi.createWithdrawal(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['owner', 'withdrawals'] })
+      queryClient.invalidateQueries({ queryKey: ['owner', 'wallet'] })
+      toast.success('Penarikan diajukan.')
     },
     onError,
   })

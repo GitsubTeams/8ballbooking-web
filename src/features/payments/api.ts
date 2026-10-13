@@ -9,9 +9,12 @@ export async function fetchPayments(bookingId: number | string): Promise<Payment
 
 export async function createPayment(
   bookingId: number | string,
-  payload: { type: PaymentType; method: PaymentMethod },
+  payload: { type: PaymentType; method: PaymentMethod; idempotency_key?: string },
 ): Promise<Payment> {
-  const { data } = await api.post<ApiEnvelope<Payment>>(`/bookings/${bookingId}/payments`, payload)
+  const { data } = await api.post<ApiEnvelope<Payment>>(`/bookings/${bookingId}/payments`, {
+    ...payload,
+    idempotency_key: payload.idempotency_key ?? crypto.randomUUID(),
+  })
   return data.data
 }
 

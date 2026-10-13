@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { formatCurrency } from '@/lib/format'
+import BookingExportCard from '@/features/owner/BookingExportCard'
 import { useOwnerSummary } from '@/features/owner/hooks'
 
 export default function OwnerDashboardPage() {
@@ -44,6 +45,8 @@ export default function OwnerDashboardPage() {
               Dihitung dari booking berstatus terkonfirmasi, berjalan, dan selesai.
             </p>
           </div>
+
+          <BookingExportCard />
         </>
       )}
     </section>

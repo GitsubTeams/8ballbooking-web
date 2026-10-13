@@ -10,6 +10,7 @@ import type {
   TableType,
 } from '@/types/booking'
 import type { Voucher, VoucherInput } from '@/types/voucher'
+import type { Wallet, Withdrawal, WithdrawalStatus } from '@/types/withdrawal'
 
 export interface OperatingHourInput {
   day_of_week: number
@@ -272,4 +273,50 @@ export const ownerLifecycleActions: Record<
     { action: 'no-show', label: 'No-show' },
   ],
   ongoing: [{ action: 'complete', label: 'Selesai' }],
+}
+
+export interface OwnerWithdrawalFilters {
+  status?: WithdrawalStatus | ''
+  page?: number
+}
+
+export interface WithdrawalInput {
+  store_id: number
+  amount: number
+  bank_name: string
+  account_number: string
+  account_name: string
+  note?: string | null
+}
+
+export interface BookingExportParams {
+  from: string
+  to: string
+  store_id?: number | string
+}
+
+export async function fetchOwnerWithdrawals(filters: OwnerWithdrawalFilters = {}) {
+  const { data } = await api.get<ApiEnvelope<Withdrawal[]> & { meta: PaginationMeta }>(
+    '/owner/withdrawals',
+    { params: filters },
+  )
+  return { withdrawals: data.data, meta: data.meta }
+}
+
+export async function fetchOwnerWallet(): Promise<Wallet> {
+  const { data } = await api.get<ApiEnvelope<Wallet>>('/owner/wallet')
+  return data.data
+}
+
+export async function createWithdrawal(payload: WithdrawalInput): Promise<Withdrawal> {
+  const { data } = await api.post<ApiEnvelope<Withdrawal>>('/owner/withdrawals', payload)
+  return data.data
+}
+
+export async function downloadBookingsCsv(params: BookingExportParams): Promise<Blob> {
+  const { data } = await api.get<Blob>('/owner/reports/bookings.csv', {
+    params,
+    responseType: 'blob',
+  })
+  return data
 }
